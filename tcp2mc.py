@@ -130,7 +130,7 @@ def infinite_loop(addr, port, settings, prepend, delay_sec=1.0):
     import memcache
     mc = memcache.Client(['127.0.0.1:11211'], debug=0)
 
-    while 1:
+    for _ in range(10):
             pass
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -182,12 +182,13 @@ if __name__ == '__main__':
     common_settings = [
         ("192.168.0.117", 502, mtcp_settings17, "pixel_17", 1),
         ("192.168.0.111", 502, mtcp_settings11, "pixel_11", 1),
-    #    ("127.0.0.1", 502, first10, "mb_slave32", 10),
         ("192.168.0.69", 502, first10, "mb_slave64", 0.5),
+        ("192.168.0.69", 502, first10, "mb_slave32", 1),
+        ("192.168.0.69", 502, first10, "mb_slave16", 2),
     ]
 
     freeze_support()
-    pool = Pool()
+    pool = Pool(processes=3)
     pool.map(infinite_loop_star, iter(common_settings))
     pool.close()
     pool.join()
