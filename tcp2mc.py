@@ -6,7 +6,7 @@ from datetime import datetime
 from time import sleep
 hexString = lambda byteString: " ".join(x.encode('hex') for x in byteString)
 
-from transliterate import translit, get_available_language_codes
+from transliterate import translit
 
 alive_sec = 300
 
@@ -187,8 +187,9 @@ if __name__ == '__main__':
         ("192.168.0.69", 502, first10, "mb_slave16", 2),
     ]
 
+
     freeze_support()
-    pool = Pool(processes=3)
+    pool = Pool(processes=len(common_settings))
     pool.map(infinite_loop_star, iter(common_settings))
     pool.close()
     pool.join()
