@@ -20,7 +20,13 @@ onChange = 1            #saveAttr:(delta, 3min)
 percentChange = 2       #3%
 onSpecialChange = 3     #otherTagID=value
 
-from spiderSettings import pixel_std_map, form_std_settings, aktanishSettings
+#bad but working
+import sys
+try:
+    sys.path.insert(0, 'd:\\Azat\\PycharmProjects\\first')
+    from spiderSettings import pixel_std_map, form_std_settings, aktanishSettings
+except:
+    print "Smth is wrong in import"
 first10 = aktanishSettings[0]
 
 #left just for example
@@ -83,10 +89,10 @@ def printTuple(mc, dataT, valT, strT, prependStr='', key_str_separater='.', val_
         formKeyStr = "{}{}{}".format(prependStr, key_str_separater, dataT[i]['name'])
         formKeyStr = formKeyStr.replace(" ", "_")   #no blanks in key
 
-	formKeyStr = translit(formKeyStr.decode("utf-8"), 'ru', reversed=True)
-	#formKeyStr = formKeyStr.decode("utf-8")
+        formKeyStr = translit(formKeyStr.decode("utf-8"), 'ru', reversed=True)
+        #formKeyStr = formKeyStr.decode("utf-8")
 
-        formValStr = "{}{}{}".format(value,val_str_separater, strT)
+        formValStr = "{}{}{}".format(value,val_str_separater,strT)
         print "{}={}".format(formKeyStr, formValStr)
         mc.set(form_key_str(formKeyStr,onlineStr), formValStr, alive_sec)
         #last saved values and append archiving
@@ -132,7 +138,7 @@ def infinite_loop(addr, port, settings, prepend, delay_sec=1.0):
 
     #for _ in range(10):
     while 1:
-	try:
+        try:
             pass
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
