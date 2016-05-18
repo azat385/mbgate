@@ -130,7 +130,9 @@ def infinite_loop(addr, port, settings, prepend, delay_sec=1.0):
     import memcache
     mc = memcache.Client(['127.0.0.1:11211'], debug=0)
 
-    for _ in range(10):
+    #for _ in range(10):
+    while 1:
+	try:
             pass
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -156,11 +158,11 @@ def infinite_loop(addr, port, settings, prepend, delay_sec=1.0):
                 #send_data to mc
                 for v, mtcp, t in zip(val_t, settings, strTimeStamp_t):
                    printTuple(mc, mtcp['data'] ,v, t, prependStr=prepend)
-        #except:
-        #    print "Exiting"
-        #    sock.close()
-        #    #exit()
-        #finally:
+        except:
+            print "Exiting"
+            sock.close()
+            #exit()
+        finally:
             sleep(delay_sec)
             sock.close()
 
@@ -180,15 +182,15 @@ if __name__ == '__main__':
     from multiprocessing import Pool, freeze_support
 
     common_settings = [
-        ("192.168.0.117", 502, mtcp_settings17, "pixel_17", 1),
+        ("192.168.0.117", 502, mtcp_settings17, "pixel_17", 1.2),
         ("192.168.0.111", 502, mtcp_settings11, "pixel_11", 1),
         ("192.168.0.69", 502, first10, "mb_slave64", 0.5),
         ("192.168.0.69", 502, first10, "mb_slave32", 1),
-        ("192.168.0.69", 502, first10, "mb_slave16", 2),
+        ("192.168.0.69", 502, first10, "mb_slave16", 1),
     ]
 
     freeze_support()
-    pool = Pool(processes=3)
+    pool = Pool(processes=5)
     pool.map(infinite_loop_star, iter(common_settings))
     pool.close()
     pool.join()
