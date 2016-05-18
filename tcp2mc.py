@@ -191,11 +191,7 @@ if __name__ == '__main__':
 
 
     freeze_support()
-<<<<<<< HEAD
-    pool = Pool(processes=5)
-=======
     pool = Pool(processes=len(common_settings))
->>>>>>> 7b736beb4211612ee145b388169e529b1808bc95
     pool.map(infinite_loop_star, iter(common_settings))
     pool.close()
     pool.join()
