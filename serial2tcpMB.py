@@ -17,7 +17,7 @@ except:
 
 ser = serial.Serial()
 
-ser.baudrate = 19200
+ser.baudrate = 115200
 ser.port = 'COM5'
 ser.bytesize = 8
 ser.parity = 'N'
@@ -42,8 +42,8 @@ ser.close()
 
 #[addr of rtu slave, addr of tcp slave, ip, port]
 settings = [
-    [17, 17, "192.168.0.117", 502],
-    [11, 11, "192.168.0.111", 502],
+    [7, 17, "192.168.0.117", 502],
+    [1, 11, "192.168.0.111", 502],
     [14, 4, "192.168.0.69", 502],
 ]
 
@@ -59,21 +59,28 @@ def column(matrix, i):
 allowed_id = column(settings,0)
 
 
+def res_error_str(msg, _id):
+    res = struct.pack(">BBB", _id, *msg)
+    res = addCRC(res)
+    res = str(res)
+    print "Error code:", hexString(res)
+    return res
+
 class ErrorResp():
     """errors here!!!"""
 
     def __init__(self):
         pass
 
-    crc_fail = "\x81\x99"
-    no_id = "\x81\x100"
+    crc_fail = "\x51\x99"
+    no_id = (129, 1)
 
-    cant_open_tcp_port = "\x81\x101"
-    tcp_timeout_reached = "\x81\x102"
+    cant_open_tcp_port = "\x51\x12"
+    tcp_timeout_reached = "\x81\x13"
 
 
-req_frm_rtu = ">bbHHbb"     # 17, 3, 40960, 100, crc1, crc2
-req_frm_tcp = ">bbHHbbHH"   # 10, 0, 0, 6, 17, 3, 40960, 100
+req_frm_rtu = ">BBHHBB"     # 17, 3, 40960, 100, crc1, crc2
+req_frm_tcp = ">BBHHBBHH"   # 10, 0, 0, 6, 17, 3, 40960, 100
 
 def change_req_rtu2tcp(req_rtu_as_list, new_id):
     """:param    """
@@ -84,21 +91,21 @@ def change_req_rtu2tcp(req_rtu_as_list, new_id):
 
 
 def change_req_tcp2rtu(req_as_str, old_id):
-    req_as_str = req_as_str[10:]   # cut tcp header=9 plus 1 to id
-    req_as_str = struct.pack(">b", old_id) + req_as_str
+    req_as_str = req_as_str[7:]   # cut tcp header=9 plus 1 to id
+    req_as_str = struct.pack(">B", old_id) + req_as_str
     req_as_str = addCRC(req_as_str) # byte array
     return str(req_as_str)
 
 
 if __name__ == '__main__':
-    r = change_req_tcp2rtu("\x01\x02\x03"+'\n\x00\x00\x00\x00\x06\x11\x03\xa0\x00\x00d', 7)
-    print r
-    exit()
+    #exit()
 
-    for _ in range(100):
+    #for _ in range(100):
+    while 1:
         if ser.is_open:
             print "waiting for input request"
             req_raw = ser.read(size=8)
+            print "get rtu:", hexString(req_raw)
             if checkCRC(req_raw):
                 print "Error in CRC"
                 ser.write(ErrorResp.crc_fail)
@@ -109,7 +116,7 @@ if __name__ == '__main__':
 
             if req_id not in allowed_id:
                 print "ID is not allowed"
-                ser.write(ErrorResp.no_id)
+                ser.write(res_error_str(ErrorResp.no_id, req_id))
                 continue
 
             rtu_id, tcp_id, addr, port = vlook_up(value=req_id, matrix=settings, col=0)
@@ -126,8 +133,10 @@ if __name__ == '__main__':
                 sock.close()
                 ser.write(ErrorResp.cant_open_tcp_port)
                 continue
+            print "send tcp:", hexString(req_tcp), "to", addr, port
             sock.send(req_tcp)
             res_tcp = sock.recv(1024)
+            print "get tcp:", hexString(res_tcp), "from", addr, port
             if res_tcp is None:
                 print "Timeout reached"
                 sock.close()
@@ -135,6 +144,7 @@ if __name__ == '__main__':
                 continue
             sock.close()
             res_rtu = change_req_tcp2rtu(req_as_str=res_tcp, old_id=rtu_id)
+            print "send rtu:", hexString(res_rtu)
             ser.write(res_rtu)
             print "data sended OK!"
 
