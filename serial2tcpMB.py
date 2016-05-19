@@ -5,6 +5,19 @@ import socket
 import struct
 from datetime import datetime
 hexString = lambda byteString: " ".join(x.encode('hex') for x in byteString)
+import yaml
+
+with open("serial2tcpMB.yaml", 'r') as ymlfile:
+    cfg = yaml.load(ymlfile)
+
+for section in cfg:
+    print(section)
+serial_settings = cfg['serial']
+print serial_settings
+s = cfg['rtu2tcp']
+print s['settings']
+settings = s['settings']
+
 
 #bad but working
 import sys
@@ -16,36 +29,31 @@ except:
     print "Smth is wrong in import"
 
 ser = serial.Serial()
-
-ser.baudrate = 115200
-ser.port = 'COM5'
-ser.bytesize = 8
-ser.parity = 'N'
-ser.stopbits = 1
-ser.timeout = None
-ser.xonxoff = 0
-ser.rtscts = 0
+# set up serial settings
+ser.baudrate = serial_settings["baudrate"] if "baudrate" in serial_settings else 115200
+ser.port = serial_settings["port"] if "port" in serial_settings else 'COM5'
+ser.bytesize = serial_settings["bytesize"] if "bytesize" in serial_settings else 8
+ser.parity = serial_settings["parity"] if "parity" in serial_settings else'N'
+ser.stopbits = serial_settings["stopbits"] if "stopbits" in serial_settings else 1
+ser.xonxoff = serial_settings["xonxoff"] if "xonxoff" in serial_settings else 0
+ser.rtscts = serial_settings["rtscts"] if "rtscts" in serial_settings else 0
+if "timeout" in serial_settings:
+    if serial_settings["timeout"]=="None":
+        ser.timeout = None
+    else:
+        ser.timeout = serial_settings["timeout"]
+else:
+    ser.timeout = None
+print "Serial settings:", ser
 
 """
-print ser.is_open
-ser.open()
-print ser.is_open
-ser.write("hello!!!")
-ser.close()
-
-print ser.is_open
-ser.open()
-print ser.is_open
-ser.write("hello!!!")
-ser.close()
-"""
-
 #[addr of rtu slave, addr of tcp slave, ip, port]
 settings = [
     [7, 17, "192.168.0.117", 502],
     [1, 11, "192.168.0.111", 502],
     [14, 4, "192.168.0.69", 502],
 ]
+"""
 
 def vlook_up(value, matrix, col):
     for m in matrix:

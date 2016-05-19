@@ -1,0 +1,14 @@
+serial:
+  port: COM6
+  baudrate: 115200
+  bytesize: 8
+  parity: N
+  stopbits: 1
+  timeout: None
+  xonxoff: 0
+  rtscts: 0
+rtu2tcp:
+  settings:
+    - [7, 17, '192.168.0.117', 502]
+    - [1, 11, '192.168.0.111', 502]
+    - [14, 4, '192.168.0.69', 502]
