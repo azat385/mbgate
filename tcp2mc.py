@@ -33,6 +33,7 @@ first10 = aktanishSettings[0]
 req_str = struct.pack(">bbHHbbHH", 10, 0, 0, 6, 17, 3, 40960, 100 )
 #print hexString(req_str)
 
+
 def create_std_settings(address=1):
     mtcp_settings = [form_std_settings(pixel_std_map[0], modbus_set=(address, 3, 40960), prepend_name=""),
                        form_std_settings(pixel_std_map[1], modbus_set=(address, 3, 41065), prepend_name="")]
