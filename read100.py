@@ -22,10 +22,13 @@ def main():
         master.set_verbose(True)
         logger.info("connected")
 	while 1:
+	    try:
         	logger.info(master.execute(7, cst.READ_HOLDING_REGISTERS, 40960, 100))
 		logger.info(master.execute(1, cst.READ_HOLDING_REGISTERS, 40960, 100))
 		logger.info(master.execute(23, cst.READ_HOLDING_REGISTERS, 100, 20))
                 logger.info(master.execute(24, cst.READ_HOLDING_REGISTERS, 100, 20))
+	    except:
+		print "smth is wrong!!!"
         #send some queries
         #logger.info(master.execute(1, cst.READ_COILS, 0, 10))
         #logger.info(master.execute(1, cst.READ_DISCRETE_INPUTS, 0, 8))
